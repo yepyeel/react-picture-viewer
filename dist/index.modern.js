@@ -1,4 +1,4 @@
-import React, { createContext, useReducer, useContext, memo, useCallback, useEffect, useState, Fragment, useMemo } from 'react';
+import React, { createContext, useReducer, useContext, useState, useCallback, useEffect, memo, useMemo, Fragment } from 'react';
 import { Portal } from 'react-portal';
 
 const initialState = picturesList => ({
@@ -55,6 +55,42 @@ function useStore() {
   return store;
 }
 
+function useWindowSize() {
+  const [windowWidth, setWindowWidth] = useState(document.body.clientWidth);
+  const [windowHeight, setWindowHeight] = useState(document.body.clientHeight);
+  const setSize = useCallback(() => {
+    setWindowWidth(document.body.clientWidth);
+    setWindowHeight(document.body.clientHeight);
+  }, []);
+  useEffect(() => {
+    window.addEventListener('resize', setSize);
+    return () => {
+      window.removeEventListener('resize', setSize);
+    };
+  }, []);
+  return {
+    windowWidth,
+    windowHeight
+  };
+}
+function useImgSize(fn) {
+  const {
+    imgScale
+  } = useStore();
+  const [imgWidth, setImgWidth] = useState(0);
+  const [imgHeight, setImgHeight] = useState(0);
+  useEffect(() => {
+    const ele = fn();
+    if (!ele) return;
+    setImgWidth(ele.clientWidth * imgScale);
+    setImgHeight(ele.clientHeight * imgScale);
+  }, [fn]);
+  return {
+    imgWidth,
+    imgHeight
+  };
+}
+
 var styles = {"imgWrapper":"_style-module__imgWrapper__2lMy8","container":"_style-module__container__2wixF"};
 
 const Viewer = ({
@@ -64,17 +100,38 @@ const Viewer = ({
     picturesList,
     imgScale
   } = useStore();
+  const {
+    windowWidth,
+    windowHeight
+  } = useWindowSize();
+  const {
+    imgWidth,
+    imgHeight
+  } = useImgSize(() => document.querySelector('#viewerImg'));
+  const isCanDrag = useMemo(() => imgWidth > windowWidth || imgHeight > windowHeight, [imgWidth, imgHeight, windowWidth, windowHeight]);
+  const startMove = useCallback(e => {
+    e.preventDefault();
+    if (!isCanDrag) return;
+    console.log('startMove', e);
+  }, [isCanDrag]);
+  const endMove = useCallback(e => {
+    if (!isCanDrag) return;
+    console.log('endMove', e);
+  }, [isCanDrag]);
   return React.createElement("div", {
     className: styles.imgWrapper
   }, React.createElement("div", {
     className: styles.container
   }, React.createElement("img", {
+    id: "viewerImg",
     style: {
-      transform: `scale(${imgScale})`
+      transform: `scale(${imgScale})`,
+      cursor: isCanDrag ? 'grab' : 'inherit'
     },
     src: picturesList[currentOrder].src,
     alt: picturesList[currentOrder].alt,
-    onMouseDown: e => e.preventDefault()
+    onMouseDown: startMove,
+    onMouseUp: endMove
   })));
 };
 

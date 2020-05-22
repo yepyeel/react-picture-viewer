@@ -81,6 +81,54 @@ function useStore() {
   return store;
 }
 
+function useWindowSize() {
+  var _useState = React.useState(document.body.clientWidth),
+      windowWidth = _useState[0],
+      setWindowWidth = _useState[1];
+
+  var _useState2 = React.useState(document.body.clientHeight),
+      windowHeight = _useState2[0],
+      setWindowHeight = _useState2[1];
+
+  var setSize = React.useCallback(function () {
+    setWindowWidth(document.body.clientWidth);
+    setWindowHeight(document.body.clientHeight);
+  }, []);
+  React.useEffect(function () {
+    window.addEventListener('resize', setSize);
+    return function () {
+      window.removeEventListener('resize', setSize);
+    };
+  }, []);
+  return {
+    windowWidth: windowWidth,
+    windowHeight: windowHeight
+  };
+}
+function useImgSize(fn) {
+  var _useStore = useStore(),
+      imgScale = _useStore.imgScale;
+
+  var _useState3 = React.useState(0),
+      imgWidth = _useState3[0],
+      setImgWidth = _useState3[1];
+
+  var _useState4 = React.useState(0),
+      imgHeight = _useState4[0],
+      setImgHeight = _useState4[1];
+
+  React.useEffect(function () {
+    var ele = fn();
+    if (!ele) return;
+    setImgWidth(ele.clientWidth * imgScale);
+    setImgHeight(ele.clientHeight * imgScale);
+  }, [fn]);
+  return {
+    imgWidth: imgWidth,
+    imgHeight: imgHeight
+  };
+}
+
 var styles = {"imgWrapper":"_style-module__imgWrapper__2lMy8","container":"_style-module__container__2wixF"};
 
 var Viewer = function Viewer(_ref) {
@@ -90,19 +138,42 @@ var Viewer = function Viewer(_ref) {
       picturesList = _useStore.picturesList,
       imgScale = _useStore.imgScale;
 
+  var _useWindowSize = useWindowSize(),
+      windowWidth = _useWindowSize.windowWidth,
+      windowHeight = _useWindowSize.windowHeight;
+
+  var _useImgSize = useImgSize(function () {
+    return document.querySelector('#viewerImg');
+  }),
+      imgWidth = _useImgSize.imgWidth,
+      imgHeight = _useImgSize.imgHeight;
+
+  var isCanDrag = React.useMemo(function () {
+    return imgWidth > windowWidth || imgHeight > windowHeight;
+  }, [imgWidth, imgHeight, windowWidth, windowHeight]);
+  var startMove = React.useCallback(function (e) {
+    e.preventDefault();
+    if (!isCanDrag) return;
+    console.log('startMove', e);
+  }, [isCanDrag]);
+  var endMove = React.useCallback(function (e) {
+    if (!isCanDrag) return;
+    console.log('endMove', e);
+  }, [isCanDrag]);
   return React__default.createElement("div", {
     className: styles.imgWrapper
   }, React__default.createElement("div", {
     className: styles.container
   }, React__default.createElement("img", {
+    id: "viewerImg",
     style: {
-      transform: "scale(" + imgScale + ")"
+      transform: "scale(" + imgScale + ")",
+      cursor: isCanDrag ? 'grab' : 'inherit'
     },
     src: picturesList[currentOrder].src,
     alt: picturesList[currentOrder].alt,
-    onMouseDown: function onMouseDown(e) {
-      return e.preventDefault();
-    }
+    onMouseDown: startMove,
+    onMouseUp: endMove
   })));
 };
 
