@@ -1,0 +1,127 @@
+@import '../../../assets/icon.scss';
+
+.container {
+  width: 100%;
+  height: 100%;
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  .top {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 200px;
+    z-index: 1005;
+
+    .close {
+      position: absolute;
+      right: 50px;
+      top: 30px;
+      cursor: pointer;
+      background-color: #fff;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 1px solid #f3f2f2;
+
+      color: rgba($color: #000000, $alpha: 0.6);
+
+      box-shadow: 4px 4px 6px #eee;
+      transition: all 0.5s;
+
+      > :global(.iconfont) {
+        font-size: 20px;
+      }
+
+      &:hover {
+        box-shadow: 10px 4px 15px #eee;
+        color: rgba($color: #000000, $alpha: 1.0);
+      }
+    }
+  }
+
+  .bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+
+    width: 100%;
+    height: 200px;
+
+    opacity: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    transition: all 0.3s ease-in-out;
+    z-index: 1005;
+
+    &.shown {
+      opacity: 1;
+    }
+
+    &:hover {
+      opacity: 1;
+    }
+
+    .controller {
+      display: flex;
+      align-items: center;
+      flex-wrap: nowrap;
+
+      width: auto;
+      height: 32px;
+
+      margin: 0 auto;
+      margin-top: 100px;
+      padding: 5px 20px;
+
+      border-radius: 30px;
+      background-color: #fff;
+
+      box-shadow: 0 1px 5px 0 rgba(0,0,0,.08);
+      transition: all 0.5s;
+
+      user-select: none;
+
+      .controllerItem {
+        height: 100%;
+        margin: 5px 10px;
+        cursor: pointer;
+
+        display: flex;
+        align-items: center;
+
+        &:hover :global(.iconfont) {
+          color: rgba($color: #000000, $alpha: 0.8);
+        }
+
+        > :global(.iconfont) {
+          font-size: 28px;
+          color: rgba($color: #000000, $alpha: 0.6);
+          transition: all 0.3s;
+        }
+
+      }
+
+      .separator {
+        display: block;
+        height: 26px;
+        width: 1px;
+        margin: 10px;
+        box-shadow: inset -1px 0 0 0 rgba(51, 51, 51, 0.15);
+      }
+    }
+  }
+}
