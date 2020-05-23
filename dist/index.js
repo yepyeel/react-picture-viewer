@@ -260,7 +260,7 @@ function useMove() {
   };
 }
 
-var styles = {"imgWrapper":"_style-module__imgWrapper__2lMy8","container":"_style-module__container__2wixF"};
+var styles = {"imgWrapper":"_2lMy8","container":"_2wixF"};
 
 var Viewer = function Viewer(_ref) {
   var currentOrder = _ref.currentOrder;
@@ -302,7 +302,7 @@ var Viewer = function Viewer(_ref) {
 
 var Viewer$1 = React.memo(Viewer);
 
-var styles$1 = {"tooltip":"_styles-module__tooltip__3v6O1","tooltipContent":"_styles-module__tooltipContent__kVYhz"};
+var styles$1 = {"tooltip":"_3v6O1","tooltipContent":"_kVYhz"};
 
 var Tooltip = function Tooltip(_ref) {
   var content = _ref.content,
@@ -371,7 +371,7 @@ function useScaleFn() {
   };
 }
 
-var styles$2 = {"container":"_styles-module__container__3HDoU","top":"_styles-module__top__370j9","close":"_styles-module__close__3E0KE","bottom":"_styles-module__bottom__2MUcf","shown":"_styles-module__shown__3Np0V","controller":"_styles-module__controller__1LTsG","controllerItem":"_styles-module__controllerItem__5vOXG","separator":"_styles-module__separator__2AeAi"};
+var styles$2 = {"container":"_3HDoU","top":"_370j9","close":"_3E0KE","bottom":"_2MUcf","shown":"_3Np0V","controller":"_1LTsG","controllerItem":"_5vOXG","separator":"_2AeAi"};
 
 var Controller = function Controller(_ref) {
   var onClose = _ref.onClose,
@@ -443,7 +443,7 @@ var Controller = function Controller(_ref) {
 
 var Controller$1 = React.memo(Controller);
 
-var styles$3 = {"tooltip":"_style-module__tooltip__1WUaC"};
+var styles$3 = {"tooltip":"_1WUaC"};
 
 var timeout = null;
 
@@ -476,7 +476,7 @@ var ScaleTip = function ScaleTip() {
 
 var ScaleTip$1 = React.memo(ScaleTip);
 
-var styles$4 = {"wrapperLayer":"_styles-module__wrapperLayer__GvF_3"};
+var styles$4 = {"wrapperLayer":"_GvF_3"};
 
 var Browser = function Browser(props) {
   var keyboard = props.keyboard,

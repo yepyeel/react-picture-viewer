@@ -7,21 +7,21 @@
 ## Install
 
 ```bash
-npm install --save react-picture-viewer
+npm install --save @codingbycat/react-picture-viewer
 ```
 
 ## Usage
 
 ```tsx
-import React, { Component } from 'react'
+import React from 'react'
 
-import MyComponent from 'react-picture-viewer'
+import PictureViewer from 'react-picture-viewer'
 import 'react-picture-viewer/dist/index.css'
 
-class Example extends Component {
-  render() {
-    return <MyComponent />
-  }
+function App() {
+  return (
+    <PictureViewer picture={{ alt: 'img1', src: 'imgURL'}} />
+  )
 }
 ```
 
