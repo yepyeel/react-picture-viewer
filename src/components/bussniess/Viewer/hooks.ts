@@ -1,5 +1,8 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo, MouseEvent } from 'react'
 import { useStore } from '@/context'
+
+const floor = (num: number) => Math.floor(num)
+const abs = (num: number) => Math.abs(num)
 
 export function useWindowSize() {
   const [windowWidth, setWindowWidth] = useState(document.body.clientWidth)
@@ -33,4 +36,98 @@ export function useImgSize(fn: () => HTMLImageElement | null) {
   }, [fn])
 
   return { imgWidth, imgHeight }
+}
+
+export function useDragInfo() {
+  const { windowWidth, windowHeight } = useWindowSize()
+  const { imgWidth, imgHeight } = useImgSize(() =>
+    document.querySelector<HTMLImageElement>('#viewerImg')
+  )
+
+  const isCanDrag = useMemo(
+    () => imgWidth > windowWidth || imgHeight > windowHeight,
+    [imgWidth, imgHeight, windowWidth, windowHeight]
+  )
+
+  return { isCanDrag, windowWidth, windowHeight, imgWidth, imgHeight }
+}
+
+export function useMove() {
+  const { imgScale } = useStore()
+  const [dragStatus, setDragStatus] = useState(false)
+  const [lastReacordPos, setLastRecordPos] = useState({ x: 0, y: 0 })
+  const [startPos, setStartPos] = useState({ x: 0, y: 0 })
+  const [offsetPos, setOffsetPos] = useState({ x: 0, y: 0 })
+  const {
+    isCanDrag,
+    windowWidth,
+    imgWidth,
+    windowHeight,
+    imgHeight
+  } = useDragInfo()
+
+  useEffect(() => {
+    if (isCanDrag) return
+    setStartPos({ x: 0, y: 0 })
+    setOffsetPos({ x: 0, y: 0 })
+    setLastRecordPos({ x: 0, y: 0 })
+  }, [imgScale, isCanDrag])
+
+  const onStartMove = useCallback(
+    (e: MouseEvent<HTMLImageElement>) => {
+      e.preventDefault()
+      if (!isCanDrag) return
+      setDragStatus(true)
+      setStartPos({ x: e.clientX, y: e.clientY })
+    },
+    [isCanDrag]
+  )
+
+  const onMoving = useCallback(
+    (e: MouseEvent<HTMLImageElement>) => {
+      e.persist()
+      if (!isCanDrag || !dragStatus) return
+
+      const newPosX = startPos.x - e.clientX + lastReacordPos.x
+      const newPosY = startPos.y - e.clientY + lastReacordPos.y
+
+      if (imgWidth > windowWidth || imgHeight > windowHeight) {
+        if (abs(floor(newPosX)) < floor((imgWidth - windowWidth) / 2)) {
+          setOffsetPos((pos) => ({
+            ...pos,
+            x: newPosX
+          }))
+        }
+
+        if (abs(floor(newPosY)) < floor((imgHeight - windowHeight) / 2)) {
+          setOffsetPos((pos) => ({
+            ...pos,
+            y: newPosY
+          }))
+        }
+      }
+    },
+    [
+      isCanDrag,
+      dragStatus,
+      startPos,
+      lastReacordPos,
+      imgWidth,
+      imgHeight,
+      windowWidth,
+      windowHeight
+    ]
+  )
+
+  const onEndMove = useCallback(
+    (e: MouseEvent<HTMLImageElement>) => {
+      e.preventDefault()
+      if (dragStatus === false) return
+      setDragStatus(false)
+      setLastRecordPos({ x: offsetPos.x, y: offsetPos.y })
+    },
+    [isCanDrag, dragStatus, offsetPos]
+  )
+
+  return { onStartMove, onMoving, onEndMove, offsetPos, dragStatus }
 }

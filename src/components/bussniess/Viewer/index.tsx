@@ -1,6 +1,6 @@
-import React, { memo, useMemo, useCallback, MouseEvent } from 'react'
+import React, { memo } from 'react'
 import { useStore } from '@/context'
-import { useWindowSize, useImgSize } from './hooks'
+import { useDragInfo, useMove } from './hooks'
 import styles from './style.module.scss'
 
 interface Props {
@@ -9,46 +9,28 @@ interface Props {
 
 const Viewer: React.FC<Props> = ({ currentOrder }) => {
   const { picturesList, imgScale } = useStore()
-  const { windowWidth, windowHeight } = useWindowSize()
-  const { imgWidth, imgHeight } = useImgSize(() =>
-    document.querySelector<HTMLImageElement>('#viewerImg')
-  )
-
-  const isCanDrag = useMemo(
-    () => imgWidth > windowWidth || imgHeight > windowHeight,
-    [imgWidth, imgHeight, windowWidth, windowHeight]
-  )
-
-  const startMove = useCallback(
-    (e: MouseEvent<HTMLImageElement>) => {
-      e.preventDefault()
-      if (!isCanDrag) return
-      console.log('startMove', e)
-    },
-    [isCanDrag]
-  )
-
-  const endMove = useCallback(
-    (e: MouseEvent<HTMLImageElement>) => {
-      if (!isCanDrag) return
-      console.log('endMove', e)
-    },
-    [isCanDrag]
-  )
+  const { isCanDrag } = useDragInfo()
+  const { onStartMove, onMoving, onEndMove, offsetPos, dragStatus } = useMove()
 
   return (
-    <div className={styles.imgWrapper}>
+    <div
+      className={styles.imgWrapper}
+      onMouseUp={onEndMove}
+      onMouseLeave={onEndMove}
+    >
       <div className={styles.container}>
         <img
           id="viewerImg"
+          draggable
           style={{
-            transform: `scale(${imgScale})`,
+            transform: `translate(${-offsetPos.x}px, ${-offsetPos.y}px) scale(${imgScale})`,
+            transition: dragStatus ? `none` : 'transform 0.3s ease-in-out',
             cursor: isCanDrag ? 'grab' : 'inherit'
           }}
           src={picturesList[currentOrder].src}
           alt={picturesList[currentOrder].alt}
-          onMouseDown={startMove}
-          onMouseUp={endMove}
+          onMouseDown={onStartMove}
+          onMouseMove={onMoving}
         />
       </div>
     </div>

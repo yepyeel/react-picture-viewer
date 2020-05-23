@@ -1,4 +1,4 @@
-import React, { createContext, useReducer, useContext, useState, useCallback, useEffect, memo, useMemo, Fragment } from 'react';
+import React, { createContext, useReducer, useContext, useMemo, useState, useEffect, useCallback, memo, Fragment } from 'react';
 import { Portal } from 'react-portal';
 
 const initialState = picturesList => ({
@@ -55,6 +55,10 @@ function useStore() {
   return store;
 }
 
+const floor = num => Math.floor(num);
+
+const abs = num => Math.abs(num);
+
 function useWindowSize() {
   const [windowWidth, setWindowWidth] = useState(document.body.clientWidth);
   const [windowHeight, setWindowHeight] = useState(document.body.clientHeight);
@@ -90,6 +94,109 @@ function useImgSize(fn) {
     imgHeight
   };
 }
+function useDragInfo() {
+  const {
+    windowWidth,
+    windowHeight
+  } = useWindowSize();
+  const {
+    imgWidth,
+    imgHeight
+  } = useImgSize(() => document.querySelector('#viewerImg'));
+  const isCanDrag = useMemo(() => imgWidth > windowWidth || imgHeight > windowHeight, [imgWidth, imgHeight, windowWidth, windowHeight]);
+  return {
+    isCanDrag,
+    windowWidth,
+    windowHeight,
+    imgWidth,
+    imgHeight
+  };
+}
+function useMove() {
+  const {
+    imgScale
+  } = useStore();
+  const [dragStatus, setDragStatus] = useState(false);
+  const [lastReacordPos, setLastRecordPos] = useState({
+    x: 0,
+    y: 0
+  });
+  const [startPos, setStartPos] = useState({
+    x: 0,
+    y: 0
+  });
+  const [offsetPos, setOffsetPos] = useState({
+    x: 0,
+    y: 0
+  });
+  const {
+    isCanDrag,
+    windowWidth,
+    imgWidth,
+    windowHeight,
+    imgHeight
+  } = useDragInfo();
+  useEffect(() => {
+    if (isCanDrag) return;
+    setStartPos({
+      x: 0,
+      y: 0
+    });
+    setOffsetPos({
+      x: 0,
+      y: 0
+    });
+    setLastRecordPos({
+      x: 0,
+      y: 0
+    });
+  }, [imgScale, isCanDrag]);
+  const onStartMove = useCallback(e => {
+    e.preventDefault();
+    if (!isCanDrag) return;
+    setDragStatus(true);
+    setStartPos({
+      x: e.clientX,
+      y: e.clientY
+    });
+  }, [isCanDrag]);
+  const onMoving = useCallback(e => {
+    e.persist();
+    if (!isCanDrag || !dragStatus) return;
+    const newPosX = startPos.x - e.clientX + lastReacordPos.x;
+    const newPosY = startPos.y - e.clientY + lastReacordPos.y;
+
+    if (imgWidth > windowWidth || imgHeight > windowHeight) {
+      if (abs(floor(newPosX)) < floor((imgWidth - windowWidth) / 2)) {
+        setOffsetPos(pos => ({ ...pos,
+          x: newPosX
+        }));
+      }
+
+      if (abs(floor(newPosY)) < floor((imgHeight - windowHeight) / 2)) {
+        setOffsetPos(pos => ({ ...pos,
+          y: newPosY
+        }));
+      }
+    }
+  }, [isCanDrag, dragStatus, startPos, lastReacordPos, imgWidth, imgHeight, windowWidth, windowHeight]);
+  const onEndMove = useCallback(e => {
+    e.preventDefault();
+    if (dragStatus === false) return;
+    setDragStatus(false);
+    setLastRecordPos({
+      x: offsetPos.x,
+      y: offsetPos.y
+    });
+  }, [isCanDrag, dragStatus, offsetPos]);
+  return {
+    onStartMove,
+    onMoving,
+    onEndMove,
+    offsetPos,
+    dragStatus
+  };
+}
 
 var styles = {"imgWrapper":"_style-module__imgWrapper__2lMy8","container":"_style-module__container__2wixF"};
 
@@ -101,37 +208,33 @@ const Viewer = ({
     imgScale
   } = useStore();
   const {
-    windowWidth,
-    windowHeight
-  } = useWindowSize();
+    isCanDrag
+  } = useDragInfo();
   const {
-    imgWidth,
-    imgHeight
-  } = useImgSize(() => document.querySelector('#viewerImg'));
-  const isCanDrag = useMemo(() => imgWidth > windowWidth || imgHeight > windowHeight, [imgWidth, imgHeight, windowWidth, windowHeight]);
-  const startMove = useCallback(e => {
-    e.preventDefault();
-    if (!isCanDrag) return;
-    console.log('startMove', e);
-  }, [isCanDrag]);
-  const endMove = useCallback(e => {
-    if (!isCanDrag) return;
-    console.log('endMove', e);
-  }, [isCanDrag]);
+    onStartMove,
+    onMoving,
+    onEndMove,
+    offsetPos,
+    dragStatus
+  } = useMove();
   return React.createElement("div", {
-    className: styles.imgWrapper
+    className: styles.imgWrapper,
+    onMouseUp: onEndMove,
+    onMouseLeave: onEndMove
   }, React.createElement("div", {
     className: styles.container
   }, React.createElement("img", {
     id: "viewerImg",
+    draggable: true,
     style: {
-      transform: `scale(${imgScale})`,
+      transform: `translate(${-offsetPos.x}px, ${-offsetPos.y}px) scale(${imgScale})`,
+      transition: dragStatus ? `none` : 'transform 0.3s ease-in-out',
       cursor: isCanDrag ? 'grab' : 'inherit'
     },
     src: picturesList[currentOrder].src,
     alt: picturesList[currentOrder].alt,
-    onMouseDown: startMove,
-    onMouseUp: endMove
+    onMouseDown: onStartMove,
+    onMouseMove: onMoving
   })));
 };
 

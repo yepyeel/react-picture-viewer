@@ -81,6 +81,14 @@ function useStore() {
   return store;
 }
 
+var floor = function floor(num) {
+  return Math.floor(num);
+};
+
+var abs = function abs(num) {
+  return Math.abs(num);
+};
+
 function useWindowSize() {
   var _useState = React.useState(document.body.clientWidth),
       windowWidth = _useState[0],
@@ -128,16 +136,7 @@ function useImgSize(fn) {
     imgHeight: imgHeight
   };
 }
-
-var styles = {"imgWrapper":"_style-module__imgWrapper__2lMy8","container":"_style-module__container__2wixF"};
-
-var Viewer = function Viewer(_ref) {
-  var currentOrder = _ref.currentOrder;
-
-  var _useStore = useStore(),
-      picturesList = _useStore.picturesList,
-      imgScale = _useStore.imgScale;
-
+function useDragInfo() {
   var _useWindowSize = useWindowSize(),
       windowWidth = _useWindowSize.windowWidth,
       windowHeight = _useWindowSize.windowHeight;
@@ -151,29 +150,153 @@ var Viewer = function Viewer(_ref) {
   var isCanDrag = React.useMemo(function () {
     return imgWidth > windowWidth || imgHeight > windowHeight;
   }, [imgWidth, imgHeight, windowWidth, windowHeight]);
-  var startMove = React.useCallback(function (e) {
+  return {
+    isCanDrag: isCanDrag,
+    windowWidth: windowWidth,
+    windowHeight: windowHeight,
+    imgWidth: imgWidth,
+    imgHeight: imgHeight
+  };
+}
+function useMove() {
+  var _useStore2 = useStore(),
+      imgScale = _useStore2.imgScale;
+
+  var _useState5 = React.useState(false),
+      dragStatus = _useState5[0],
+      setDragStatus = _useState5[1];
+
+  var _useState6 = React.useState({
+    x: 0,
+    y: 0
+  }),
+      lastReacordPos = _useState6[0],
+      setLastRecordPos = _useState6[1];
+
+  var _useState7 = React.useState({
+    x: 0,
+    y: 0
+  }),
+      startPos = _useState7[0],
+      setStartPos = _useState7[1];
+
+  var _useState8 = React.useState({
+    x: 0,
+    y: 0
+  }),
+      offsetPos = _useState8[0],
+      setOffsetPos = _useState8[1];
+
+  var _useDragInfo = useDragInfo(),
+      isCanDrag = _useDragInfo.isCanDrag,
+      windowWidth = _useDragInfo.windowWidth,
+      imgWidth = _useDragInfo.imgWidth,
+      windowHeight = _useDragInfo.windowHeight,
+      imgHeight = _useDragInfo.imgHeight;
+
+  React.useEffect(function () {
+    if (isCanDrag) return;
+    setStartPos({
+      x: 0,
+      y: 0
+    });
+    setOffsetPos({
+      x: 0,
+      y: 0
+    });
+    setLastRecordPos({
+      x: 0,
+      y: 0
+    });
+  }, [imgScale, isCanDrag]);
+  var onStartMove = React.useCallback(function (e) {
     e.preventDefault();
     if (!isCanDrag) return;
-    console.log('startMove', e);
+    setDragStatus(true);
+    setStartPos({
+      x: e.clientX,
+      y: e.clientY
+    });
   }, [isCanDrag]);
-  var endMove = React.useCallback(function (e) {
-    if (!isCanDrag) return;
-    console.log('endMove', e);
-  }, [isCanDrag]);
+  var onMoving = React.useCallback(function (e) {
+    e.persist();
+    if (!isCanDrag || !dragStatus) return;
+    var newPosX = startPos.x - e.clientX + lastReacordPos.x;
+    var newPosY = startPos.y - e.clientY + lastReacordPos.y;
+
+    if (imgWidth > windowWidth || imgHeight > windowHeight) {
+      if (abs(floor(newPosX)) < floor((imgWidth - windowWidth) / 2)) {
+        setOffsetPos(function (pos) {
+          return _extends(_extends({}, pos), {}, {
+            x: newPosX
+          });
+        });
+      }
+
+      if (abs(floor(newPosY)) < floor((imgHeight - windowHeight) / 2)) {
+        setOffsetPos(function (pos) {
+          return _extends(_extends({}, pos), {}, {
+            y: newPosY
+          });
+        });
+      }
+    }
+  }, [isCanDrag, dragStatus, startPos, lastReacordPos, imgWidth, imgHeight, windowWidth, windowHeight]);
+  var onEndMove = React.useCallback(function (e) {
+    e.preventDefault();
+    if (dragStatus === false) return;
+    setDragStatus(false);
+    setLastRecordPos({
+      x: offsetPos.x,
+      y: offsetPos.y
+    });
+  }, [isCanDrag, dragStatus, offsetPos]);
+  return {
+    onStartMove: onStartMove,
+    onMoving: onMoving,
+    onEndMove: onEndMove,
+    offsetPos: offsetPos,
+    dragStatus: dragStatus
+  };
+}
+
+var styles = {"imgWrapper":"_style-module__imgWrapper__2lMy8","container":"_style-module__container__2wixF"};
+
+var Viewer = function Viewer(_ref) {
+  var currentOrder = _ref.currentOrder;
+
+  var _useStore = useStore(),
+      picturesList = _useStore.picturesList,
+      imgScale = _useStore.imgScale;
+
+  var _useDragInfo = useDragInfo(),
+      isCanDrag = _useDragInfo.isCanDrag;
+
+  var _useMove = useMove(),
+      onStartMove = _useMove.onStartMove,
+      onMoving = _useMove.onMoving,
+      onEndMove = _useMove.onEndMove,
+      offsetPos = _useMove.offsetPos,
+      dragStatus = _useMove.dragStatus;
+
   return React__default.createElement("div", {
-    className: styles.imgWrapper
+    className: styles.imgWrapper,
+    onMouseUp: onEndMove,
+    onMouseLeave: onEndMove
   }, React__default.createElement("div", {
     className: styles.container
   }, React__default.createElement("img", {
     id: "viewerImg",
+    draggable: true,
     style: {
-      transform: "scale(" + imgScale + ")",
+      transform: "translate(" + -offsetPos.x + "px, " + -offsetPos.y + "px) scale(" + imgScale + ")",
+      transition: dragStatus ? "none" : 'transform 0.3s ease-in-out',
       cursor: isCanDrag ? 'grab' : 'inherit'
     },
     src: picturesList[currentOrder].src,
     alt: picturesList[currentOrder].alt,
-    onMouseDown: startMove,
-    onMouseUp: endMove
+    onMouseDown: onStartMove,
+    onMouseMove: onMoving
   })));
 };
 
