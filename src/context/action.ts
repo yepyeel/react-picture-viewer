@@ -8,4 +8,14 @@ interface SET_SCALE {
   scale: number
 }
 
-export type IAction = SHOWN_LAYER | SET_SCALE
+interface SET_ROTATE {
+  type: 'SET_ROTATE'
+  rotate: number
+}
+
+interface SET_PICTURE_ORDER {
+  type: 'SET_PICTURE_ORDER'
+  order: number
+}
+
+export type IAction = SHOWN_LAYER | SET_SCALE | SET_ROTATE | SET_PICTURE_ORDER

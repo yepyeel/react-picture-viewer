@@ -113,6 +113,12 @@
           transition: all 0.3s;
         }
 
+        &.disabled {
+          pointer-events: none;
+          opacity: 0.3;
+          cursor: not-allowed;
+        }
+
       }
 
       .separator {

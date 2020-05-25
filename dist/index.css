@@ -61,7 +61,7 @@
       border-width: 5px;
       border-style: solid; }
 
-@import url("http://at.alicdn.com/t/font_1835200_ej5mlxfz8y8.css");
+@import url("http://at.alicdn.com/t/font_1835200_otzvnhaawdo.css");
 ._styles-module__container__3HDoU {
   width: 100%;
   height: 100%;
@@ -142,6 +142,10 @@
           font-size: 28px;
           color: rgba(0, 0, 0, 0.6);
           transition: all 0.3s; }
+        ._styles-module__container__3HDoU ._styles-module__bottom__2MUcf ._styles-module__controller__1LTsG ._styles-module__controllerItem__5vOXG._styles-module__disabled__2amGt {
+          pointer-events: none;
+          opacity: 0.3;
+          cursor: not-allowed; }
       ._styles-module__container__3HDoU ._styles-module__bottom__2MUcf ._styles-module__controller__1LTsG ._styles-module__separator__2AeAi {
         display: block;
         height: 26px;

@@ -10,6 +10,6 @@ export interface Props {
   className?: string
   zIndex?: number | string
   keyboard?: boolean
-  currentOrder?: number
+  pictureOrder?: number
   picture: IPicture[] | IPicture
 }

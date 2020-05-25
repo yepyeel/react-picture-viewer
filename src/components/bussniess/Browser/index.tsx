@@ -1,4 +1,4 @@
-import React, { Fragment, memo } from 'react'
+import React, { Fragment, memo, useEffect } from 'react'
 import { useStore } from '@/context'
 import { Portal } from 'react-portal'
 import Viewer from '../Viewer'
@@ -8,15 +8,21 @@ import { Props } from './interface.d'
 import styles from './styles.module.scss'
 
 const Browser: React.FC<Props> = (props) => {
-  const { keyboard, currentOrder } = props
+  const { keyboard, pictureOrder } = props
   const { layerShown, dispatch } = useStore()
+
+  useEffect(() => {
+    if (layerShown) {
+      dispatch({ type: 'SET_PICTURE_ORDER', order: pictureOrder })
+    }
+  }, [layerShown])
 
   return (
     <Fragment>
       {layerShown && (
         <Portal>
           <div className={styles.wrapperLayer}>
-            <Viewer currentOrder={currentOrder} />
+            <Viewer />
 
             <Controller
               keyboard={keyboard}

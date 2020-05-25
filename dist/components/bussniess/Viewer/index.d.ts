@@ -1,6 +1,3 @@
 import React from 'react';
-interface Props {
-    currentOrder: number;
-}
-declare const _default: React.NamedExoticComponent<Props>;
+declare const _default: React.NamedExoticComponent<{}>;
 export default _default;

@@ -2,6 +2,12 @@ import { IPicture } from '@/components/bussniess/PictureViewer/interface';
 export interface IState {
     layerShown: boolean;
     picturesList: IPicture[];
+    pictureOrder: number;
     imgScale: number;
+    imgRotate: number;
 }
-export declare const initialState: (picturesList: IPicture[]) => IState;
+interface initialProps {
+    picturesList: IPicture[];
+}
+export declare const initialState: ({ picturesList }: initialProps) => IState;
+export {};
