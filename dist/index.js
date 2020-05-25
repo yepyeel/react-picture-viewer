@@ -22,11 +22,29 @@ function _extends() {
   return _extends.apply(this, arguments);
 }
 
-var initialState = function initialState(picturesList) {
+function _objectWithoutPropertiesLoose(source, excluded) {
+  if (source == null) return {};
+  var target = {};
+  var sourceKeys = Object.keys(source);
+  var key, i;
+
+  for (i = 0; i < sourceKeys.length; i++) {
+    key = sourceKeys[i];
+    if (excluded.indexOf(key) >= 0) continue;
+    target[key] = source[key];
+  }
+
+  return target;
+}
+
+var initialState = function initialState(_ref) {
+  var picturesList = _ref.picturesList;
   return {
     picturesList: picturesList,
     layerShown: false,
-    imgScale: 1
+    imgScale: 1,
+    pictureOrder: 0,
+    imgRotate: 0
   };
 };
 
@@ -49,6 +67,33 @@ function reducer(state, action) {
         });
       }
 
+    case 'SET_ROTATE':
+      {
+        return _extends(_extends({}, state), {}, {
+          imgRotate: action.rotate
+        });
+      }
+
+    case 'SET_PICTURE_ORDER':
+      {
+        var picturesListLength = state.picturesList.length;
+        var picOrder = action.order;
+
+        if (picOrder + 1 > picturesListLength) {
+          picOrder = picturesListLength - 1;
+        }
+
+        if (picOrder < 0) {
+          picOrder = 0;
+        }
+
+        return _extends(_extends({}, state), {}, {
+          pictureOrder: picOrder,
+          imgScale: 1,
+          imgRotate: 0
+        });
+      }
+
     default:
       return state;
   }
@@ -58,9 +103,13 @@ var Context = React.createContext(null);
 
 var ContextProvider = function ContextProvider(_ref) {
   var children = _ref.children,
-      picturesList = _ref.picturesList;
+      props = _objectWithoutPropertiesLoose(_ref, ["children"]);
 
-  var _useReducer = React.useReducer(reducer, initialState(picturesList)),
+  var picturesList = props.picturesList;
+
+  var _useReducer = React.useReducer(reducer, initialState({
+    picturesList: picturesList
+  })),
       state = _useReducer[0],
       dispatch = _useReducer[1];
 
@@ -80,6 +129,19 @@ function useStore() {
 
   return store;
 }
+
+var usePrevious = (function (state, compare) {
+  var prevRef = React.useRef();
+  var curRef = React.useRef();
+  var needUpdate = typeof compare === 'function' ? compare(curRef.current, state) : true;
+
+  if (needUpdate) {
+    prevRef.current = curRef.current;
+    curRef.current = state;
+  }
+
+  return prevRef.current;
+});
 
 var floor = function floor(num) {
   return Math.floor(num);
@@ -162,6 +224,10 @@ function useMove() {
   var _useStore2 = useStore(),
       imgScale = _useStore2.imgScale;
 
+  var preImgScale = usePrevious(imgScale, function (prev, next) {
+    return prev !== next;
+  });
+
   var _useState5 = React.useState(false),
       dragStatus = _useState5[0],
       setDragStatus = _useState5[1];
@@ -195,20 +261,32 @@ function useMove() {
       imgHeight = _useDragInfo.imgHeight;
 
   React.useEffect(function () {
-    if (isCanDrag) return;
-    setStartPos({
-      x: 0,
-      y: 0
-    });
-    setOffsetPos({
-      x: 0,
-      y: 0
-    });
-    setLastRecordPos({
-      x: 0,
-      y: 0
-    });
-  }, [imgScale, isCanDrag]);
+    if (!isCanDrag) {
+      setStartPos({
+        x: 0,
+        y: 0
+      });
+      setOffsetPos({
+        x: 0,
+        y: 0
+      });
+      setLastRecordPos({
+        x: 0,
+        y: 0
+      });
+    } else {
+      if (!preImgScale) return;
+      if (preImgScale < imgScale) return;
+      setOffsetPos({
+        x: 0,
+        y: 0
+      });
+      setLastRecordPos({
+        x: 0,
+        y: 0
+      });
+    }
+  }, [preImgScale, isCanDrag]);
   var onStartMove = React.useCallback(function (e) {
     e.preventDefault();
     if (!isCanDrag) return;
@@ -260,14 +338,16 @@ function useMove() {
   };
 }
 
-var styles = {"imgWrapper":"_2lMy8","container":"_2wixF"};
+var styles = {"imgWrapper":"_style-module__imgWrapper__2lMy8","container":"_style-module__container__2wixF"};
 
-var Viewer = function Viewer(_ref) {
-  var currentOrder = _ref.currentOrder;
+var Viewer = function Viewer() {
+  var _picturesList$picture, _picturesList$picture2;
 
   var _useStore = useStore(),
       picturesList = _useStore.picturesList,
-      imgScale = _useStore.imgScale;
+      pictureOrder = _useStore.pictureOrder,
+      imgScale = _useStore.imgScale,
+      imgRotate = _useStore.imgRotate;
 
   var _useDragInfo = useDragInfo(),
       isCanDrag = _useDragInfo.isCanDrag;
@@ -289,12 +369,12 @@ var Viewer = function Viewer(_ref) {
     id: "viewerImg",
     draggable: true,
     style: {
-      transform: "translate(" + -offsetPos.x + "px, " + -offsetPos.y + "px) scale(" + imgScale + ")",
+      transform: "translate(" + -offsetPos.x + "px, " + -offsetPos.y + "px) scale(" + imgScale + ") rotate(" + imgRotate + "deg)",
       transition: dragStatus ? "none" : 'transform 0.3s ease-in-out',
       cursor: isCanDrag ? 'grab' : 'inherit'
     },
-    src: picturesList[currentOrder].src,
-    alt: picturesList[currentOrder].alt,
+    src: ((_picturesList$picture = picturesList[pictureOrder]) === null || _picturesList$picture === void 0 ? void 0 : _picturesList$picture.src) || '',
+    alt: ((_picturesList$picture2 = picturesList[pictureOrder]) === null || _picturesList$picture2 === void 0 ? void 0 : _picturesList$picture2.alt) || '',
     onMouseDown: onStartMove,
     onMouseMove: onMoving
   })));
@@ -302,7 +382,7 @@ var Viewer = function Viewer(_ref) {
 
 var Viewer$1 = React.memo(Viewer);
 
-var styles$1 = {"tooltip":"_3v6O1","tooltipContent":"_kVYhz"};
+var styles$1 = {"tooltip":"_styles-module__tooltip__3v6O1","tooltipContent":"_styles-module__tooltipContent__kVYhz"};
 
 var Tooltip = function Tooltip(_ref) {
   var content = _ref.content,
@@ -340,13 +420,17 @@ function useIntoViewerShown() {
 
   React.useEffect(function () {
     if (!layerShown) return;
-    setTimeout(function () {
+    var timeout = null;
+    timeout = setTimeout(function () {
       setControllerShown(false);
     }, 2000);
+    return function () {
+      if (timeout) clearTimeout(timeout);
+    };
   }, [layerShown]);
   return controllerShown;
 }
-function useScaleFn() {
+function useScale() {
   var _useStore2 = useStore(),
       dispatch = _useStore2.dispatch,
       imgScale = _useStore2.imgScale;
@@ -365,13 +449,66 @@ function useScaleFn() {
       scale: imgScale - 0.25
     });
   }, [imgScale]);
+  var zoomreset = React.useCallback(function () {
+    dispatch({
+      type: 'SET_SCALE',
+      scale: 1
+    });
+  }, []);
   return {
     zoomin: zoomin,
-    zoomout: zoomout
+    zoomout: zoomout,
+    zoomreset: zoomreset
+  };
+}
+function useToggle() {
+  var _useStore3 = useStore(),
+      picturesList = _useStore3.picturesList,
+      pictureOrder = _useStore3.pictureOrder,
+      dispatch = _useStore3.dispatch;
+
+  var isCanGoNext = React.useMemo(function () {
+    return pictureOrder + 1 < picturesList.length;
+  }, [pictureOrder, picturesList]);
+  var isCanGoLast = React.useMemo(function () {
+    return pictureOrder > 0;
+  }, [pictureOrder]);
+  var goNext = React.useCallback(function () {
+    dispatch({
+      type: 'SET_PICTURE_ORDER',
+      order: pictureOrder + 1
+    });
+  }, [pictureOrder]);
+  var goLast = React.useCallback(function () {
+    dispatch({
+      type: 'SET_PICTURE_ORDER',
+      order: pictureOrder - 1
+    });
+  }, [pictureOrder]);
+  return {
+    goNext: goNext,
+    goLast: goLast,
+    isCanGoNext: isCanGoNext,
+    isCanGoLast: isCanGoLast
+  };
+}
+function useRotate() {
+  var _useStore4 = useStore(),
+      imgRotate = _useStore4.imgRotate,
+      dispatch = _useStore4.dispatch;
+
+  var rotate = React.useCallback(function () {
+    dispatch({
+      type: 'SET_ROTATE',
+      rotate: imgRotate + 90
+    });
+  }, [imgRotate]);
+  return {
+    rotate: rotate
   };
 }
 
-var styles$2 = {"container":"_3HDoU","top":"_370j9","close":"_3E0KE","bottom":"_2MUcf","shown":"_3Np0V","controller":"_1LTsG","controllerItem":"_5vOXG","separator":"_2AeAi"};
+var styles$2 = {"container":"_styles-module__container__3HDoU","top":"_styles-module__top__370j9","close":"_styles-module__close__3E0KE","bottom":"_styles-module__bottom__2MUcf","shown":"_styles-module__shown__3Np0V","controller":"_styles-module__controller__1LTsG","controllerItem":"_styles-module__controllerItem__5vOXG","disabled":"_styles-module__disabled__2amGt","separator":"_styles-module__separator__2AeAi"};
 
 var Controller = function Controller(_ref) {
   var onClose = _ref.onClose,
@@ -383,9 +520,19 @@ var Controller = function Controller(_ref) {
   useKeyboardClose(keyboard, onClose);
   var controllerShown = useIntoViewerShown();
 
-  var _useScaleFn = useScaleFn(),
-      zoomin = _useScaleFn.zoomin,
-      zoomout = _useScaleFn.zoomout;
+  var _useScale = useScale(),
+      zoomin = _useScale.zoomin,
+      zoomout = _useScale.zoomout,
+      zoomreset = _useScale.zoomreset;
+
+  var _useRotate = useRotate(),
+      rotate = _useRotate.rotate;
+
+  var _useToggle = useToggle(),
+      goNext = _useToggle.goNext,
+      goLast = _useToggle.goLast,
+      isCanGoNext = _useToggle.isCanGoNext,
+      isCanGoLast = _useToggle.isCanGoLast;
 
   return React__default.createElement("div", {
     className: styles$2.container
@@ -405,11 +552,11 @@ var Controller = function Controller(_ref) {
     className: styles$2.bottom + (controllerShown ? " " + styles$2.shown : '')
   }, React__default.createElement("div", {
     className: styles$2.controller
-  }, React__default.createElement(Tooltip$1, {
+  }, (isCanGoLast || isCanGoNext) && React__default.createElement(React.Fragment, null, React__default.createElement(Tooltip$1, {
     content: "\u4E0A\u4E00\u5F20"
   }, React__default.createElement("div", {
-    className: styles$2.controllerItem,
-    onClick: zoomin
+    className: "" + styles$2.controllerItem + ("" + (isCanGoLast ? '' : " " + styles$2.disabled)),
+    onClick: goLast
   }, React__default.createElement("i", {
     className: "iconfont icon-arrow",
     style: {
@@ -418,13 +565,23 @@ var Controller = function Controller(_ref) {
   }))), React__default.createElement(Tooltip$1, {
     content: "\u4E0B\u4E00\u5F20"
   }, React__default.createElement("div", {
-    className: styles$2.controllerItem,
-    onClick: zoomin
+    className: "" + styles$2.controllerItem + ("" + (isCanGoNext ? '' : " " + styles$2.disabled)),
+    onClick: goNext
   }, React__default.createElement("i", {
     className: "iconfont icon-arrow"
   }))), React__default.createElement("span", {
     className: styles$2.separator
-  }), React__default.createElement(Tooltip$1, {
+  })), React__default.createElement(Tooltip$1, {
+    content: "\u65CB\u8F6C"
+  }, React__default.createElement("div", {
+    className: styles$2.controllerItem,
+    onClick: rotate
+  }, React__default.createElement("i", {
+    className: "iconfont icon-rotate",
+    style: {
+      transform: 'scaleX(-1) rotate(-90deg)'
+    }
+  }))), React__default.createElement(Tooltip$1, {
     content: "\u653E\u5927"
   }, React__default.createElement("div", {
     className: styles$2.controllerItem,
@@ -438,12 +595,19 @@ var Controller = function Controller(_ref) {
     onClick: zoomout
   }, React__default.createElement("i", {
     className: "iconfont icon-zoomout"
+  }))), React__default.createElement(Tooltip$1, {
+    content: "\u8FD8\u539F\u6BD4\u4F8B"
+  }, React__default.createElement("div", {
+    className: styles$2.controllerItem,
+    onClick: zoomreset
+  }, React__default.createElement("i", {
+    className: "iconfont icon-zoomreset"
   }))))));
 };
 
 var Controller$1 = React.memo(Controller);
 
-var styles$3 = {"tooltip":"_1WUaC"};
+var styles$3 = {"tooltip":"_style-module__tooltip__1WUaC"};
 
 var timeout = null;
 
@@ -464,6 +628,9 @@ var ScaleTip = function ScaleTip() {
     timeout = setTimeout(function () {
       setShown(false);
     }, 1000);
+    return function () {
+      if (timeout) clearTimeout(timeout);
+    };
   }, [imgScale]);
   return React__default.createElement("div", {
     className: styles$3.tooltip,
@@ -476,21 +643,27 @@ var ScaleTip = function ScaleTip() {
 
 var ScaleTip$1 = React.memo(ScaleTip);
 
-var styles$4 = {"wrapperLayer":"_GvF_3"};
+var styles$4 = {"wrapperLayer":"_styles-module__wrapperLayer__GvF_3"};
 
 var Browser = function Browser(props) {
   var keyboard = props.keyboard,
-      currentOrder = props.currentOrder;
+      pictureOrder = props.pictureOrder;
 
   var _useStore = useStore(),
       layerShown = _useStore.layerShown,
       dispatch = _useStore.dispatch;
 
+  React.useEffect(function () {
+    if (layerShown) {
+      dispatch({
+        type: 'SET_PICTURE_ORDER',
+        order: pictureOrder
+      });
+    }
+  }, [layerShown]);
   return React__default.createElement(React.Fragment, null, layerShown && React__default.createElement(reactPortal.Portal, null, React__default.createElement("div", {
     className: styles$4.wrapperLayer
-  }, React__default.createElement(Viewer$1, {
-    currentOrder: currentOrder
-  }), React__default.createElement(Controller$1, {
+  }, React__default.createElement(Viewer$1, null), React__default.createElement(Controller$1, {
     keyboard: keyboard,
     onClose: function onClose() {
       return dispatch({
@@ -535,8 +708,8 @@ var PictureViewer = function PictureViewer(props) {
       zIndex = _props$zIndex === void 0 ? 1000 : _props$zIndex,
       _props$keyboard = props.keyboard,
       keyboard = _props$keyboard === void 0 ? true : _props$keyboard,
-      _props$currentOrder = props.currentOrder,
-      currentOrder = _props$currentOrder === void 0 ? 0 : _props$currentOrder;
+      _props$pictureOrder = props.pictureOrder,
+      pictureOrder = _props$pictureOrder === void 0 ? 0 : _props$pictureOrder;
   var firstImg = React.useMemo(function () {
     return Array.isArray(picture) ? picture[0] : picture;
   }, [picture]);
@@ -552,7 +725,7 @@ var PictureViewer = function PictureViewer(props) {
   }), React__default.createElement(Browser$1, {
     zIndex: zIndex,
     keyboard: keyboard,
-    currentOrder: currentOrder
+    pictureOrder: pictureOrder
   })));
 };
 

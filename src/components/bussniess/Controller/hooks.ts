@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react'
+import { useEffect, useCallback, useState, useMemo } from 'react'
 import { useStore } from '@/context'
 
 export function useKeyboardClose(usingStatus: boolean, onClose: () => void) {
@@ -26,15 +26,20 @@ export function useIntoViewerShown() {
 
   useEffect(() => {
     if (!layerShown) return
-    setTimeout(() => {
+    let timeout: NodeJS.Timeout | null = null
+    timeout = setTimeout(() => {
       setControllerShown(false)
     }, 2000)
+
+    return () => {
+      if (timeout) clearTimeout(timeout)
+    }
   }, [layerShown])
 
   return controllerShown
 }
 
-export function useScaleFn() {
+export function useScale() {
   const { dispatch, imgScale } = useStore()
   const zoomin = useCallback(() => {
     if (imgScale >= 5) return
@@ -46,5 +51,41 @@ export function useScaleFn() {
     dispatch({ type: 'SET_SCALE', scale: imgScale - 0.25 })
   }, [imgScale])
 
-  return { zoomin, zoomout }
+  const zoomreset = useCallback(() => {
+    dispatch({ type: 'SET_SCALE', scale: 1 })
+  }, [])
+
+  return { zoomin, zoomout, zoomreset }
+}
+
+export function useToggle() {
+  const { picturesList, pictureOrder, dispatch } = useStore()
+
+  const isCanGoNext = useMemo(() => {
+    return pictureOrder + 1 < picturesList.length
+  }, [pictureOrder, picturesList])
+
+  const isCanGoLast = useMemo(() => {
+    return pictureOrder > 0
+  }, [pictureOrder])
+
+  const goNext = useCallback(() => {
+    dispatch({ type: 'SET_PICTURE_ORDER', order: pictureOrder + 1 })
+  }, [pictureOrder])
+
+  const goLast = useCallback(() => {
+    dispatch({ type: 'SET_PICTURE_ORDER', order: pictureOrder - 1 })
+  }, [pictureOrder])
+
+  return { goNext, goLast, isCanGoNext, isCanGoLast }
+}
+
+export function useRotate() {
+  const { imgRotate, dispatch } = useStore()
+
+  const rotate = useCallback(() => {
+    dispatch({ type: 'SET_ROTATE', rotate: imgRotate + 90 })
+  }, [imgRotate])
+
+  return { rotate }
 }

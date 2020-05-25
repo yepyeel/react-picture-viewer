@@ -13,6 +13,23 @@ function reducer(state: IState, action: IAction): IState {
       return { ...state, imgScale: action.scale }
     }
 
+    case 'SET_ROTATE': {
+      return { ...state, imgRotate: action.rotate }
+    }
+
+    case 'SET_PICTURE_ORDER': {
+      const picturesListLength = state.picturesList.length
+      let picOrder = action.order
+      if (picOrder + 1 > picturesListLength) {
+        picOrder = picturesListLength - 1
+      }
+      if (picOrder < 0) {
+        picOrder = 0
+      }
+
+      return { ...state, pictureOrder: picOrder, imgScale: 1, imgRotate: 0 }
+    }
+
     default:
       return state
   }

@@ -3,12 +3,8 @@ import { useStore } from '@/context'
 import { useDragInfo, useMove } from './hooks'
 import styles from './style.module.scss'
 
-interface Props {
-  currentOrder: number
-}
-
-const Viewer: React.FC<Props> = ({ currentOrder }) => {
-  const { picturesList, imgScale } = useStore()
+const Viewer: React.FC = () => {
+  const { picturesList, pictureOrder, imgScale, imgRotate } = useStore()
   const { isCanDrag } = useDragInfo()
   const { onStartMove, onMoving, onEndMove, offsetPos, dragStatus } = useMove()
 
@@ -23,12 +19,12 @@ const Viewer: React.FC<Props> = ({ currentOrder }) => {
           id="viewerImg"
           draggable
           style={{
-            transform: `translate(${-offsetPos.x}px, ${-offsetPos.y}px) scale(${imgScale})`,
+            transform: `translate(${-offsetPos.x}px, ${-offsetPos.y}px) scale(${imgScale}) rotate(${imgRotate}deg)`,
             transition: dragStatus ? `none` : 'transform 0.3s ease-in-out',
             cursor: isCanDrag ? 'grab' : 'inherit'
           }}
-          src={picturesList[currentOrder].src}
-          alt={picturesList[currentOrder].alt}
+          src={picturesList[pictureOrder]?.src || ''}
+          alt={picturesList[pictureOrder]?.alt || ''}
           onMouseDown={onStartMove}
           onMouseMove={onMoving}
         />

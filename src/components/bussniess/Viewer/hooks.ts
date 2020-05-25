@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useMemo, MouseEvent } from 'react'
 import { useStore } from '@/context'
+import usePrevious from '@/utils/usePrevious'
 
 const floor = (num: number) => Math.floor(num)
 const abs = (num: number) => Math.abs(num)
@@ -54,6 +55,7 @@ export function useDragInfo() {
 
 export function useMove() {
   const { imgScale } = useStore()
+  const preImgScale = usePrevious(imgScale, (prev, next) => prev !== next)
   const [dragStatus, setDragStatus] = useState(false)
   const [lastReacordPos, setLastRecordPos] = useState({ x: 0, y: 0 })
   const [startPos, setStartPos] = useState({ x: 0, y: 0 })
@@ -67,11 +69,19 @@ export function useMove() {
   } = useDragInfo()
 
   useEffect(() => {
-    if (isCanDrag) return
-    setStartPos({ x: 0, y: 0 })
-    setOffsetPos({ x: 0, y: 0 })
-    setLastRecordPos({ x: 0, y: 0 })
-  }, [imgScale, isCanDrag])
+    // If it is not possible in advance, set the picture as the center
+    if (!isCanDrag) {
+      setStartPos({ x: 0, y: 0 })
+      setOffsetPos({ x: 0, y: 0 })
+      setLastRecordPos({ x: 0, y: 0 })
+    } else {
+      if (!preImgScale) return
+      if (preImgScale < imgScale) return
+
+      setOffsetPos({ x: 0, y: 0 })
+      setLastRecordPos({ x: 0, y: 0 })
+    }
+  }, [preImgScale, isCanDrag])
 
   const onStartMove = useCallback(
     (e: MouseEvent<HTMLImageElement>) => {

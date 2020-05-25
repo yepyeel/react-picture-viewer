@@ -13,8 +13,9 @@ interface Props {
   picturesList: IPicture[]
 }
 
-const ContextProvider: React.FC<Props> = ({ children, picturesList }) => {
-  const [state, dispatch] = useReducer(reducer, initialState(picturesList))
+const ContextProvider: React.FC<Props> = ({ children, ...props }) => {
+  const { picturesList } = props
+  const [state, dispatch] = useReducer(reducer, initialState({ picturesList }))
 
   return (
     <Context.Provider value={{ dispatch, ...state }}>

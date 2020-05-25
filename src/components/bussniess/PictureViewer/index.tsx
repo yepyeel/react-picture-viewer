@@ -4,10 +4,11 @@ import Browser from '@/components/bussniess/Browser'
 import { Props, IPicture } from './interface'
 
 interface ImgProps {
+  firstImg: IPicture
   style?: React.CSSProperties
   className?: string
-  firstImg: IPicture
 }
+
 const ImgViewer: React.FC<ImgProps> = memo((props) => {
   const { style, className, firstImg } = props
   const { dispatch } = useStore()
@@ -29,7 +30,7 @@ const PictureViewer: React.FC<Props> = (props) => {
     picture,
     zIndex = 1000,
     keyboard = true,
-    currentOrder = 0
+    pictureOrder = 0
   } = props
 
   const firstImg = useMemo<IPicture>(
@@ -50,7 +51,7 @@ const PictureViewer: React.FC<Props> = (props) => {
         <Browser
           zIndex={zIndex}
           keyboard={keyboard}
-          currentOrder={currentOrder}
+          pictureOrder={pictureOrder}
         />
       </Fragment>
     </ContextProvider>

@@ -16,6 +16,10 @@ const ScaleTip: React.FC = () => {
     timeout = setTimeout(() => {
       setShown(false)
     }, 1000)
+
+    return () => {
+      if (timeout) clearTimeout(timeout)
+    }
   }, [imgScale])
 
   return (
