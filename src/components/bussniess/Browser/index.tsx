@@ -8,7 +8,7 @@ import { Props } from './interface.d'
 import styles from './styles.module.scss'
 
 const Browser: React.FC<Props> = (props) => {
-  const { keyboard, pictureOrder } = props
+  const { keyboard, pictureOrder, zIndex } = props
   const { layerShown, dispatch } = useStore()
 
   useEffect(() => {
@@ -21,7 +21,10 @@ const Browser: React.FC<Props> = (props) => {
     <Fragment>
       {layerShown && (
         <Portal>
-          <div className={styles.wrapperLayer}>
+          <div
+            className={styles.wrapperLayer}
+            style={{ zIndex: +zIndex || 1000 }}
+          >
             <Viewer />
 
             <Controller

@@ -338,7 +338,7 @@ function useMove() {
   };
 }
 
-var styles = {"imgWrapper":"_2lMy8","container":"_2wixF"};
+var styles = {"imgWrapper":"_style-module__imgWrapper__2lMy8","container":"_style-module__container__2wixF"};
 
 var Viewer = function Viewer() {
   var _picturesList$picture, _picturesList$picture2;
@@ -382,7 +382,7 @@ var Viewer = function Viewer() {
 
 var Viewer$1 = React.memo(Viewer);
 
-var styles$1 = {"tooltip":"_3v6O1","tooltipContent":"_kVYhz"};
+var styles$1 = {"tooltip":"_styles-module__tooltip__3v6O1","tooltipContent":"_styles-module__tooltipContent__kVYhz"};
 
 var Tooltip = function Tooltip(_ref) {
   var content = _ref.content,
@@ -508,7 +508,7 @@ function useRotate() {
   };
 }
 
-var styles$2 = {"container":"_3HDoU","top":"_370j9","close":"_3E0KE","bottom":"_2MUcf","shown":"_3Np0V","controller":"_1LTsG","controllerItem":"_5vOXG","disabled":"_2amGt","separator":"_2AeAi"};
+var styles$2 = {"container":"_styles-module__container__3HDoU","top":"_styles-module__top__370j9","close":"_styles-module__close__3E0KE","bottom":"_styles-module__bottom__2MUcf","shown":"_styles-module__shown__3Np0V","controller":"_styles-module__controller__1LTsG","controllerItem":"_styles-module__controllerItem__5vOXG","disabled":"_styles-module__disabled__2amGt","separator":"_styles-module__separator__2AeAi"};
 
 var Controller = function Controller(_ref) {
   var onClose = _ref.onClose,
@@ -607,7 +607,7 @@ var Controller = function Controller(_ref) {
 
 var Controller$1 = React.memo(Controller);
 
-var styles$3 = {"tooltip":"_1WUaC"};
+var styles$3 = {"tooltip":"_style-module__tooltip__1WUaC"};
 
 var timeout = null;
 
@@ -643,11 +643,12 @@ var ScaleTip = function ScaleTip() {
 
 var ScaleTip$1 = React.memo(ScaleTip);
 
-var styles$4 = {"wrapperLayer":"_GvF_3"};
+var styles$4 = {"wrapperLayer":"_styles-module__wrapperLayer__GvF_3"};
 
 var Browser = function Browser(props) {
   var keyboard = props.keyboard,
-      pictureOrder = props.pictureOrder;
+      pictureOrder = props.pictureOrder,
+      zIndex = props.zIndex;
 
   var _useStore = useStore(),
       layerShown = _useStore.layerShown,
@@ -662,7 +663,10 @@ var Browser = function Browser(props) {
     }
   }, [layerShown]);
   return React__default.createElement(React.Fragment, null, layerShown && React__default.createElement(reactPortal.Portal, null, React__default.createElement("div", {
-    className: styles$4.wrapperLayer
+    className: styles$4.wrapperLayer,
+    style: {
+      zIndex: +zIndex || 1000
+    }
   }, React__default.createElement(Viewer$1, null), React__default.createElement(Controller$1, {
     keyboard: keyboard,
     onClose: function onClose() {
@@ -729,6 +733,5 @@ var PictureViewer = function PictureViewer(props) {
   })));
 };
 
-exports.PictureViewer = PictureViewer;
-exports.default = PictureViewer;
+module.exports = PictureViewer;
 //# sourceMappingURL=index.js.map
