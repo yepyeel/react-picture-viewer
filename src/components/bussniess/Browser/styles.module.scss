@@ -12,5 +12,7 @@
 
   user-select: none;
 
-  box-sizing: none;
+  * {
+    box-sizing: unset;
+  }
 }

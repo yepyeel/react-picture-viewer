@@ -2,7 +2,7 @@ import React, { createContext, useReducer, Dispatch, useContext } from 'react'
 import { initialState, IState } from './state'
 import { IAction } from './action'
 import reducer from './reducer'
-import { IPicture } from '@/components/bussniess/PictureViewer/interface'
+import { IPicture } from '..'
 
 interface IContext extends IState {
   dispatch: Dispatch<IAction>

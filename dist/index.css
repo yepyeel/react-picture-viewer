@@ -183,5 +183,6 @@
   -webkit-user-select: none;
      -moz-user-select: none;
       -ms-user-select: none;
-          user-select: none;
-  box-sizing: none; }
+          user-select: none; }
+  ._styles-module__wrapperLayer__GvF_3 * {
+    box-sizing: unset; }

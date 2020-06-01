@@ -1,4 +1,4 @@
-import { IPicture } from '@/components/bussniess/PictureViewer/interface';
+import { IPicture } from '..';
 export interface IState {
     layerShown: boolean;
     picturesList: IPicture[];
