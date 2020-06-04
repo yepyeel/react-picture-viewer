@@ -4,7 +4,13 @@ import { useDragInfo, useMove } from './hooks'
 import styles from './style.module.scss'
 
 const Viewer: React.FC = () => {
-  const { picturesList, pictureOrder, imgScale, imgRotate } = useStore()
+  const {
+    picturesList,
+    pictureOrder,
+    imgScale,
+    imgRotate,
+    layerShown
+  } = useStore()
   const { isCanDrag } = useDragInfo()
   const { onStartMove, onMoving, onEndMove, offsetPos, dragStatus } = useMove()
 
@@ -14,7 +20,14 @@ const Viewer: React.FC = () => {
       onMouseUp={onEndMove}
       onMouseLeave={onEndMove}
     >
-      <div className={styles.container}>
+      <div
+        className={styles.container}
+        style={{
+          transform: layerShown
+            ? 'translate(-50%, -50%) scale(1)'
+            : 'translate(-50%, -50%) scale(0)'
+        }}
+      >
         <img
           id="viewerImg"
           draggable
