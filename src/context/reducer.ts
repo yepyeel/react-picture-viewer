@@ -3,6 +3,16 @@ import { IAction } from './action'
 
 function reducer(state: IState, action: IAction): IState {
   switch (action.type) {
+    case 'RESET_PROPS': {
+      const {
+        picturesList = [],
+        zoomDelta = 25,
+        zoomMax = 500,
+        zoomMin = 25
+      } = action.props
+      return { ...state, picturesList, zoomDelta, zoomMax, zoomMin }
+    }
+
     case 'SHOWN_LAYER': {
       const returnState = { ...state, layerShown: action.visible }
       if (!action.visible) returnState.imgScale = 1

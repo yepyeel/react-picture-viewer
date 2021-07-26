@@ -1,7 +1,7 @@
 {
   "name": "react-picture-viewer-example",
   "homepage": "https://codingbycat.github.io/react-picture-viewer",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "dependencies": {
     "react": "link:../node_modules/react",

@@ -1,6 +1,18 @@
+import { IPicture } from '..'
+
 interface SHOWN_LAYER {
   type: 'SHOWN_LAYER'
   visible: boolean
+}
+
+interface RESET_PROPS {
+  type: 'RESET_PROPS'
+  props: {
+    picturesList: IPicture[]
+    zoomDelta?: number
+    zoomMax?: number
+    zoomMin?: number
+  }
 }
 
 interface SET_SCALE {
@@ -18,4 +30,9 @@ interface SET_PICTURE_ORDER {
   order: number
 }
 
-export type IAction = SHOWN_LAYER | SET_SCALE | SET_ROTATE | SET_PICTURE_ORDER
+export type IAction =
+  | SHOWN_LAYER
+  | SET_SCALE
+  | SET_ROTATE
+  | SET_PICTURE_ORDER
+  | RESET_PROPS

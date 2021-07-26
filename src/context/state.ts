@@ -6,16 +6,19 @@ export interface IState {
   pictureOrder: number
   imgScale: number
   imgRotate: number
+  zoomDelta: number
+  zoomMax: number
+  zoomMin: number
 }
 
-interface initialProps {
-  picturesList: IPicture[]
-}
 
-export const initialState = ({ picturesList }: initialProps): IState => ({
-  picturesList,
+export const initialState = (): IState => ({
+  picturesList: [],
   layerShown: false,
   imgScale: 1,
   pictureOrder: 0,
-  imgRotate: 0
+  imgRotate: 0,
+  zoomDelta: 25,
+  zoomMax: 500,
+  zoomMin: 25
 })

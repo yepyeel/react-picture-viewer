@@ -13,6 +13,9 @@ export interface Props {
   zIndex?: number | string
   keyboard?: boolean
   pictureOrder?: number
+  zoomDelta?: number
+  zoomMax?: number
+  zoomMin?: number
   picture: IPicture[] | IPicture
 }
 
@@ -43,7 +46,8 @@ const PictureViewer: React.FC<Props> = (props) => {
     picture,
     zIndex = 1000,
     keyboard = true,
-    pictureOrder = 0
+    pictureOrder = 0,
+    ...ctxProps
   } = props
 
   const firstImg = useMemo<IPicture>(
@@ -57,7 +61,7 @@ const PictureViewer: React.FC<Props> = (props) => {
   )
 
   return (
-    <ContextProvider picturesList={picturesList}>
+    <ContextProvider picturesList={picturesList} {...ctxProps}>
       <Fragment>
         <ImgViewer firstImg={firstImg} style={style} className={className} />
 
