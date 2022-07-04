@@ -42,12 +42,10 @@ export function useIntoViewerShown() {
 export function useScale() {
   const { dispatch, imgScale } = useStore()
   const zoomin = useCallback(() => {
-    if (imgScale >= 5) return
     dispatch({ type: 'SET_SCALE', scale: imgScale + 0.25 })
   }, [imgScale])
 
   const zoomout = useCallback(() => {
-    if (imgScale <= 0.25) return
     dispatch({ type: 'SET_SCALE', scale: imgScale - 0.25 })
   }, [imgScale])
 

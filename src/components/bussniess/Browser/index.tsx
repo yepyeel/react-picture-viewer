@@ -8,7 +8,7 @@ import { Props } from './interface.d'
 import styles from './styles.module.scss'
 
 const Browser: React.FC<Props> = (props) => {
-  const { keyboard, pictureOrder, zIndex } = props
+  const { keyboard, pictureOrder, zIndex, onOut } = props
   const { layerShown, dispatch } = useStore()
 
   useEffect(() => {
@@ -29,7 +29,10 @@ const Browser: React.FC<Props> = (props) => {
 
             <Controller
               keyboard={keyboard}
-              onClose={() => dispatch({ type: 'SHOWN_LAYER', visible: false })}
+              onClose={async () => {
+                await onOut?.()
+                dispatch({ type: 'SHOWN_LAYER', visible: false })
+              }}
             />
 
             <ScaleTip />

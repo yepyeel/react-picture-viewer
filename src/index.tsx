@@ -14,16 +14,19 @@ export interface Props {
   keyboard?: boolean
   pictureOrder?: number
   picture: IPicture[] | IPicture
+  onPreview?: () => void | Promise<void>
+  onOut?: () => void | Promise<void>
 }
 
 interface ImgProps {
   firstImg: IPicture
   style?: React.CSSProperties
   className?: string
+  onPreview?: () => void | Promise<void>
 }
 
 const ImgViewer: React.FC<ImgProps> = memo((props) => {
-  const { style, className, firstImg } = props
+  const { style, className, firstImg, onPreview } = props
   const { dispatch } = useStore()
   return (
     <img
@@ -31,7 +34,10 @@ const ImgViewer: React.FC<ImgProps> = memo((props) => {
       style={{ cursor: 'zoom-in', ...style }}
       src={firstImg.src}
       alt={firstImg.alt}
-      onClick={() => dispatch({ type: 'SHOWN_LAYER', visible: true })}
+      onClick={async () => {
+        await onPreview?.()
+        dispatch({ type: 'SHOWN_LAYER', visible: true })
+      }}
     />
   )
 })
@@ -43,7 +49,9 @@ const PictureViewer: React.FC<Props> = (props) => {
     picture,
     zIndex = 1000,
     keyboard = true,
-    pictureOrder = 0
+    pictureOrder = 0,
+    onPreview,
+    onOut
   } = props
 
   const firstImg = useMemo<IPicture>(
@@ -59,12 +67,18 @@ const PictureViewer: React.FC<Props> = (props) => {
   return (
     <ContextProvider picturesList={picturesList}>
       <Fragment>
-        <ImgViewer firstImg={firstImg} style={style} className={className} />
+        <ImgViewer
+          firstImg={firstImg}
+          style={style}
+          className={className}
+          onPreview={onPreview}
+        />
 
         <Browser
           zIndex={zIndex}
           keyboard={keyboard}
           pictureOrder={pictureOrder}
+          onOut={onOut}
         />
       </Fragment>
     </ContextProvider>
