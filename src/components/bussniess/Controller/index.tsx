@@ -1,6 +1,5 @@
 import React, { memo, Fragment } from 'react'
 import Tooltip from '@/components/common/Tooltip'
-import { useStore } from '@/context'
 import {
   useKeyboardClose,
   useIntoViewerShown,
@@ -16,7 +15,6 @@ interface Props {
 }
 
 const Controller: React.FC<Props> = ({ onClose, keyboard }) => {
-  const { dispatch } = useStore()
   useKeyboardClose(keyboard, onClose)
   const controllerShown = useIntoViewerShown()
   const { zoomin, zoomout, zoomreset } = useScale()
@@ -26,10 +24,7 @@ const Controller: React.FC<Props> = ({ onClose, keyboard }) => {
   return (
     <div className={styles.container}>
       <div className={styles.top}>
-        <div
-          className={styles.close}
-          onClick={() => dispatch({ type: 'SHOWN_LAYER', visible: false })}
-        >
+        <div className={styles.close} onClick={onClose}>
           <i className="iconfont icon-close" />
         </div>
       </div>
